@@ -1,9 +1,8 @@
-
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import type { Project, ProjectStatus, ContentFile } from '@/lib/types';
-import { initialProjects } from '@/lib/data';
+import { api } from '@/lib/api';
 
 interface AlbumData {
   albumName: string;
@@ -23,12 +22,7 @@ interface ProjectContextType {
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
 export const ProjectProvider = ({ children }: { children: ReactNode }) => {
-  const [projectsByAlbum, setProjectsByAlbum] = useState<Record<string, AlbumData>>({
-    'music1': {
-      albumName: 'Music1',
-      projects: initialProjects
-    },
-  });
+  const [projectsByAlbum, setProjectsByAlbum] = useState<Record<string, AlbumData>>({});
 
   const getProjectsForAlbum = (albumId: string): Project[] => {
     return projectsByAlbum[albumId]?.projects || [];

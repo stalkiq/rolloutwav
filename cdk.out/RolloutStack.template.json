@@ -1,0 +1,2835 @@
+{
+ "Resources": {
+  "RolloutWebsiteBucketA05E3C02": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketName": "rollout-app-016442247702-us-west-2",
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "IgnorePublicAcls": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     },
+     {
+      "Key": "aws-cdk:cr-owned:6e3ebdde",
+      "Value": "true"
+     }
+    ],
+    "WebsiteConfiguration": {
+     "ErrorDocument": "index.html",
+     "IndexDocument": "index.html"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutWebsiteBucket/Resource"
+   }
+  },
+  "RolloutWebsiteBucketPolicyC0DF22E1": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "RolloutWebsiteBucketA05E3C02"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "RolloutWebsiteBucketA05E3C02",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "RolloutWebsiteBucketA05E3C02",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "RolloutWebsiteBucketA05E3C02",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutWebsiteBucket/Policy/Resource"
+   }
+  },
+  "RolloutWebsiteBucketAutoDeleteObjectsCustomResourceCE8DB1F4": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "RolloutWebsiteBucketA05E3C02"
+    }
+   },
+   "DependsOn": [
+    "RolloutWebsiteBucketPolicyC0DF22E1"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutWebsiteBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-016442247702-us-west-2",
+     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "RolloutWebsiteBucketA05E3C02"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+    "aws:asset:property": "Code"
+   }
+  },
+  "SiteCertificateCertificateRequestorFunctionServiceRole645E891D": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/SiteCertificate/CertificateRequestorFunction/ServiceRole/Resource"
+   }
+  },
+  "SiteCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy96ED5C9C": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "acm:RequestCertificate",
+        "acm:DescribeCertificate",
+        "acm:DeleteCertificate",
+        "acm:AddTagsToCertificate"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "route53:GetChange",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "route53:changeResourceRecordSets",
+       "Condition": {
+        "ForAllValues:StringEquals": {
+         "route53:ChangeResourceRecordSetsRecordTypes": [
+          "CNAME"
+         ],
+         "route53:ChangeResourceRecordSetsActions": [
+          "UPSERT"
+         ]
+        },
+        "ForAllValues:StringLike": {
+         "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+          "*.rolloutwav.com",
+          "*.www.rolloutwav.com"
+         ]
+        }
+       },
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":route53:::hostedzone/Z05428681W4KQCG8CTAIL"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "SiteCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy96ED5C9C",
+    "Roles": [
+     {
+      "Ref": "SiteCertificateCertificateRequestorFunctionServiceRole645E891D"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/SiteCertificate/CertificateRequestorFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "SiteCertificateCertificateRequestorFunction7CFA7DEA": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-016442247702-us-west-2",
+     "S3Key": "b073cebcf4d61fb152a30f5a5e57a94df7f980a549fdf1a79a0b18c5750522d8.zip"
+    },
+    "Handler": "index.certificateRequestHandler",
+    "Role": {
+     "Fn::GetAtt": [
+      "SiteCertificateCertificateRequestorFunctionServiceRole645E891D",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "SiteCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy96ED5C9C",
+    "SiteCertificateCertificateRequestorFunctionServiceRole645E891D"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/SiteCertificate/CertificateRequestorFunction/Resource",
+    "aws:asset:path": "asset.b073cebcf4d61fb152a30f5a5e57a94df7f980a549fdf1a79a0b18c5750522d8",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "SiteCertificateCertificateRequestorResource6021082A": {
+   "Type": "AWS::CloudFormation::CustomResource",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "SiteCertificateCertificateRequestorFunction7CFA7DEA",
+      "Arn"
+     ]
+    },
+    "DomainName": "rolloutwav.com",
+    "SubjectAlternativeNames": [
+     "www.rolloutwav.com"
+    ],
+    "HostedZoneId": "Z05428681W4KQCG8CTAIL",
+    "Region": "us-east-1"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/SiteCertificate/CertificateRequestorResource/Default"
+   }
+  },
+  "RolloutDistribution1DEBB76D": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "Aliases": [
+      "rolloutwav.com",
+      "www.rolloutwav.com"
+     ],
+     "Comment": "Rollout App Distribution",
+     "CustomErrorResponses": [
+      {
+       "ErrorCode": 404,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      },
+      {
+       "ErrorCode": 403,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      }
+     ],
+     "DefaultCacheBehavior": {
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "Compress": true,
+      "TargetOriginId": "RolloutStackRolloutDistributionOrigin1B20E039A",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "CustomOriginConfig": {
+        "OriginProtocolPolicy": "http-only",
+        "OriginSSLProtocols": [
+         "TLSv1.2"
+        ]
+       },
+       "DomainName": {
+        "Fn::Select": [
+         2,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::GetAtt": [
+             "RolloutWebsiteBucketA05E3C02",
+             "WebsiteURL"
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "Id": "RolloutStackRolloutDistributionOrigin1B20E039A"
+      }
+     ],
+     "PriceClass": "PriceClass_100",
+     "ViewerCertificate": {
+      "AcmCertificateArn": {
+       "Fn::GetAtt": [
+        "SiteCertificateCertificateRequestorResource6021082A",
+        "Arn"
+       ]
+      },
+      "MinimumProtocolVersion": "TLSv1.2_2021",
+      "SslSupportMethod": "sni-only"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutDistribution/Resource"
+   }
+  },
+  "RolloutDeploymentAwsCliLayer1497415C": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "Content": {
+     "S3Bucket": "cdk-hnb659fds-assets-016442247702-us-west-2",
+     "S3Key": "c49d356cac773d491c5f7ac148995a1181498a8e289429f8612a7f7e3814f535.zip"
+    },
+    "Description": "/opt/awscli/aws"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutDeployment/AwsCliLayer/Resource",
+    "aws:asset:path": "asset.c49d356cac773d491c5f7ac148995a1181498a8e289429f8612a7f7e3814f535.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Content"
+   }
+  },
+  "RolloutDeploymentCustomResourceDDA0FD7C": {
+   "Type": "Custom::CDKBucketDeployment",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536",
+      "Arn"
+     ]
+    },
+    "SourceBucketNames": [
+     "cdk-hnb659fds-assets-016442247702-us-west-2"
+    ],
+    "SourceObjectKeys": [
+     "ca6b464a4e245da8fde11b03ec4c834c8416f5fffc194910651ea9e869b02600.zip"
+    ],
+    "DestinationBucketName": {
+     "Ref": "RolloutWebsiteBucketA05E3C02"
+    },
+    "WaitForDistributionInvalidation": true,
+    "Prune": true,
+    "DistributionId": {
+     "Ref": "RolloutDistribution1DEBB76D"
+    },
+    "DistributionPaths": [
+     "/*"
+    ],
+    "OutputObjectKeys": true
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutDeployment/CustomResource/Default"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cdk-hnb659fds-assets-016442247702-us-west-2"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cdk-hnb659fds-assets-016442247702-us-west-2/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "RolloutWebsiteBucketA05E3C02",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "RolloutWebsiteBucketA05E3C02",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "cloudfront:GetInvalidation",
+        "cloudfront:CreateInvalidation"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+    "Roles": [
+     {
+      "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-016442247702-us-west-2",
+     "S3Key": "3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "AWS_CA_BUNDLE": "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+     }
+    },
+    "Handler": "index.handler",
+    "Layers": [
+     {
+      "Ref": "RolloutDeploymentAwsCliLayer1497415C"
+     }
+    ],
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource",
+    "aws:asset:path": "asset.3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "RolloutUserPool56876F61": {
+   "Type": "AWS::Cognito::UserPool",
+   "Properties": {
+    "AccountRecoverySetting": {
+     "RecoveryMechanisms": [
+      {
+       "Name": "verified_email",
+       "Priority": 1
+      }
+     ]
+    },
+    "AdminCreateUserConfig": {
+     "AllowAdminCreateUserOnly": false
+    },
+    "AutoVerifiedAttributes": [
+     "email"
+    ],
+    "EmailVerificationMessage": "The verification code to your new account is {####}",
+    "EmailVerificationSubject": "Verify your new account",
+    "Policies": {
+     "PasswordPolicy": {
+      "MinimumLength": 8,
+      "RequireLowercase": false,
+      "RequireNumbers": true,
+      "RequireSymbols": false,
+      "RequireUppercase": false
+     }
+    },
+    "Schema": [
+     {
+      "Mutable": false,
+      "Name": "email",
+      "Required": true
+     }
+    ],
+    "SmsVerificationMessage": "The verification code to your new account is {####}",
+    "UsernameAttributes": [
+     "email"
+    ],
+    "VerificationMessageTemplate": {
+     "DefaultEmailOption": "CONFIRM_WITH_CODE",
+     "EmailMessage": "The verification code to your new account is {####}",
+     "EmailSubject": "Verify your new account",
+     "SmsMessage": "The verification code to your new account is {####}"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutUserPool/Resource"
+   }
+  },
+  "RolloutUserPoolDomainCB647AFB": {
+   "Type": "AWS::Cognito::UserPoolDomain",
+   "Properties": {
+    "Domain": "rollout-016442247702-us-west-2",
+    "UserPoolId": {
+     "Ref": "RolloutUserPool56876F61"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutUserPoolDomain/Resource"
+   }
+  },
+  "RolloutUserPoolClientC2F2B0AC": {
+   "Type": "AWS::Cognito::UserPoolClient",
+   "Properties": {
+    "AllowedOAuthFlows": [
+     "code"
+    ],
+    "AllowedOAuthFlowsUserPoolClient": true,
+    "AllowedOAuthScopes": [
+     "openid",
+     "email",
+     "profile"
+    ],
+    "CallbackURLs": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "https://",
+        {
+         "Fn::GetAtt": [
+          "RolloutDistribution1DEBB76D",
+          "DomainName"
+         ]
+        },
+        "/auth/callback/"
+       ]
+      ]
+     },
+     "https://rolloutwav.com/auth/callback/",
+     "https://www.rolloutwav.com/auth/callback/",
+     "http://localhost:9002/auth/callback/"
+    ],
+    "ExplicitAuthFlows": [
+     "ALLOW_USER_PASSWORD_AUTH",
+     "ALLOW_USER_SRP_AUTH",
+     "ALLOW_REFRESH_TOKEN_AUTH"
+    ],
+    "GenerateSecret": false,
+    "LogoutURLs": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "https://",
+        {
+         "Fn::GetAtt": [
+          "RolloutDistribution1DEBB76D",
+          "DomainName"
+         ]
+        },
+        "/"
+       ]
+      ]
+     },
+     "https://rolloutwav.com/",
+     "https://www.rolloutwav.com/",
+     "http://localhost:9002/"
+    ],
+    "SupportedIdentityProviders": [
+     "COGNITO"
+    ],
+    "UserPoolId": {
+     "Ref": "RolloutUserPool56876F61"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutUserPoolClient/Resource"
+   }
+  },
+  "RolloutIdentityPool": {
+   "Type": "AWS::Cognito::IdentityPool",
+   "Properties": {
+    "AllowUnauthenticatedIdentities": false,
+    "CognitoIdentityProviders": [
+     {
+      "ClientId": {
+       "Ref": "RolloutUserPoolClientC2F2B0AC"
+      },
+      "ProviderName": {
+       "Fn::GetAtt": [
+        "RolloutUserPool56876F61",
+        "ProviderName"
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutIdentityPool"
+   }
+  },
+  "RolloutTable5C377832": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "pk",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "sk",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "gsi1pk",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "gsi1sk",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "GSI1",
+      "KeySchema": [
+       {
+        "AttributeName": "gsi1pk",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "gsi1sk",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "pk",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "sk",
+      "KeyType": "RANGE"
+     }
+    ],
+    "StreamSpecification": {
+     "StreamViewType": "NEW_AND_OLD_IMAGES"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutTable/Resource"
+   }
+  },
+  "RolloutTableSourceTableAttachedManagedPolicyRolloutStackawscdkawsdynamodbReplicaProviderOnEventHandlerServiceRole19A64AA5EBD589EA": {
+   "Type": "AWS::IAM::ManagedPolicy",
+   "Properties": {
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "DynamoDB replication managed policy for table ",
+       {
+        "Ref": "RolloutTable5C377832"
+       }
+      ]
+     ]
+    },
+    "Path": "/",
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "dynamodb:*",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "RolloutTable5C377832",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "RolloutTable5C377832",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "dynamodb:*",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":dynamodb:us-east-1:016442247702:table/",
+          {
+           "Ref": "RolloutTable5C377832"
+          }
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Roles": [
+     {
+      "Fn::GetAtt": [
+       "awscdkawsdynamodbReplicaProviderNestedStackawscdkawsdynamodbReplicaProviderNestedStackResource18E3F12D",
+       "Outputs.RolloutStackawscdkawsdynamodbReplicaProviderOnEventHandlerServiceRole3DD88481Ref"
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutTable/SourceTableAttachedManagedPolicy-RolloutStackawscdkawsdynamodbReplicaProviderOnEventHandlerServiceRole19A64AA5/Resource/Resource"
+   }
+  },
+  "RolloutTableSourceTableAttachedManagedPolicyRolloutStackawscdkawsdynamodbReplicaProviderIsCompleteHandlerServiceRoleB7D660CE899CD7EB": {
+   "Type": "AWS::IAM::ManagedPolicy",
+   "Properties": {
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "DynamoDB replication managed policy for table ",
+       {
+        "Ref": "RolloutTable5C377832"
+       }
+      ]
+     ]
+    },
+    "Path": "/",
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "dynamodb:DescribeTable",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "RolloutTable5C377832",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "RolloutTable5C377832",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Roles": [
+     {
+      "Fn::GetAtt": [
+       "awscdkawsdynamodbReplicaProviderNestedStackawscdkawsdynamodbReplicaProviderNestedStackResource18E3F12D",
+       "Outputs.RolloutStackawscdkawsdynamodbReplicaProviderIsCompleteHandlerServiceRoleDBE435A8Ref"
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutTable/SourceTableAttachedManagedPolicy-RolloutStackawscdkawsdynamodbReplicaProviderIsCompleteHandlerServiceRoleB7D660CE/Resource/Resource"
+   }
+  },
+  "RolloutTableReplicauseast1C37E6D6A": {
+   "Type": "Custom::DynamoDBReplica",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "awscdkawsdynamodbReplicaProviderNestedStackawscdkawsdynamodbReplicaProviderNestedStackResource18E3F12D",
+      "Outputs.RolloutStackawscdkawsdynamodbReplicaProviderframeworkonEventB72AC20DArn"
+     ]
+    },
+    "TableName": {
+     "Ref": "RolloutTable5C377832"
+    },
+    "Region": "us-east-1"
+   },
+   "DependsOn": [
+    "RolloutTableSourceTableAttachedManagedPolicyRolloutStackawscdkawsdynamodbReplicaProviderIsCompleteHandlerServiceRoleB7D660CE899CD7EB",
+    "RolloutTableSourceTableAttachedManagedPolicyRolloutStackawscdkawsdynamodbReplicaProviderOnEventHandlerServiceRole19A64AA5EBD589EA"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutTable/Replicaus-east-1/Default"
+   }
+  },
+  "awscdkawsdynamodbReplicaProviderNestedStackawscdkawsdynamodbReplicaProviderNestedStackResource18E3F12D": {
+   "Type": "AWS::CloudFormation::Stack",
+   "Properties": {
+    "Parameters": {
+     "referencetoRolloutStackRolloutTable0225CF69Ref": {
+      "Ref": "RolloutTable5C377832"
+     }
+    },
+    "TemplateURL": {
+     "Fn::Join": [
+      "",
+      [
+       "https://s3.us-west-2.",
+       {
+        "Ref": "AWS::URLSuffix"
+       },
+       "/cdk-hnb659fds-assets-016442247702-us-west-2/c9cdff307961b620a2a6cc82da5e239317ff2b21efea5ac9d88e33515215e32f.json"
+      ]
+     ]
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/@aws-cdk--aws-dynamodb.ReplicaProvider.NestedStack/@aws-cdk--aws-dynamodb.ReplicaProvider.NestedStackResource",
+    "aws:asset:path": "RolloutStackawscdkawsdynamodbReplicaProvider3317704A.nested.template.json",
+    "aws:asset:property": "TemplateURL"
+   }
+  },
+  "RolloutMediaBucket5902AF71": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "GET",
+        "PUT",
+        "HEAD"
+       ],
+       "AllowedOrigins": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "https://",
+           {
+            "Fn::GetAtt": [
+             "RolloutDistribution1DEBB76D",
+             "DomainName"
+            ]
+           }
+          ]
+         ]
+        },
+        "https://rolloutwav.com",
+        "https://www.rolloutwav.com",
+        "http://localhost:9002"
+       ],
+       "ExposedHeaders": [
+        "ETag"
+       ],
+       "MaxAge": 3000
+      }
+     ]
+    },
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 3
+       },
+       "NoncurrentVersionExpiration": {
+        "NoncurrentDays": 30
+       },
+       "Status": "Enabled",
+       "Transitions": [
+        {
+         "StorageClass": "STANDARD_IA",
+         "TransitionInDays": 30
+        },
+        {
+         "StorageClass": "GLACIER",
+         "TransitionInDays": 180
+        },
+        {
+         "StorageClass": "DEEP_ARCHIVE",
+         "TransitionInDays": 365
+        }
+       ]
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutMediaBucket/Resource"
+   }
+  },
+  "RolloutMediaBucketPolicyE479FFCC": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "RolloutMediaBucket5902AF71"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "RolloutMediaBucket5902AF71",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "RolloutMediaBucket5902AF71",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutMediaBucket/Policy/Resource"
+   }
+  },
+  "RolloutMediaBucketAutoDeleteObjectsCustomResource0508F6EF": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "RolloutMediaBucket5902AF71"
+    }
+   },
+   "DependsOn": [
+    "RolloutMediaBucketPolicyE479FFCC"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutMediaBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "MeFunctionServiceRole93625EC7": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/MeFunction/ServiceRole/Resource"
+   }
+  },
+  "MeFunctionServiceRoleDefaultPolicy316F73BE": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "RolloutTable5C377832",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "RolloutTable5C377832",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-east-1:016442247702:table/",
+           {
+            "Ref": "RolloutTable5C377832"
+           }
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-east-1:016442247702:table/",
+           {
+            "Ref": "RolloutTable5C377832"
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "MeFunctionServiceRoleDefaultPolicy316F73BE",
+    "Roles": [
+     {
+      "Ref": "MeFunctionServiceRole93625EC7"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/MeFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "MeFunction4482FBE1": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-016442247702-us-west-2",
+     "S3Key": "8f2b8e77f9a4a94dece899238ae853236723923274647d23c92e21dfcab4e61e.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": {
+       "Ref": "RolloutTable5C377832"
+      },
+      "MEDIA_BUCKET": {
+       "Ref": "RolloutMediaBucket5902AF71"
+      },
+      "USER_POOL_ID": {
+       "Ref": "RolloutUserPool56876F61"
+      },
+      "REGION": "us-west-2"
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "MeFunctionServiceRole93625EC7",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "MeFunctionServiceRoleDefaultPolicy316F73BE",
+    "MeFunctionServiceRole93625EC7"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/MeFunction/Resource",
+    "aws:asset:path": "asset.8f2b8e77f9a4a94dece899238ae853236723923274647d23c92e21dfcab4e61e",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "AlbumsFunctionServiceRole7C89B48D": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/AlbumsFunction/ServiceRole/Resource"
+   }
+  },
+  "AlbumsFunctionServiceRoleDefaultPolicy4CF5AB8F": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "RolloutTable5C377832",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "RolloutTable5C377832",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-east-1:016442247702:table/",
+           {
+            "Ref": "RolloutTable5C377832"
+           }
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-east-1:016442247702:table/",
+           {
+            "Ref": "RolloutTable5C377832"
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "AlbumsFunctionServiceRoleDefaultPolicy4CF5AB8F",
+    "Roles": [
+     {
+      "Ref": "AlbumsFunctionServiceRole7C89B48D"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/AlbumsFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "AlbumsFunction044E746F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-016442247702-us-west-2",
+     "S3Key": "cb494f15ee8a1aedbf5e366a3c1671e131aeb727f4928c6af198c10bc5ebc5a5.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": {
+       "Ref": "RolloutTable5C377832"
+      },
+      "MEDIA_BUCKET": {
+       "Ref": "RolloutMediaBucket5902AF71"
+      },
+      "USER_POOL_ID": {
+       "Ref": "RolloutUserPool56876F61"
+      },
+      "REGION": "us-west-2"
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "AlbumsFunctionServiceRole7C89B48D",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 15
+   },
+   "DependsOn": [
+    "AlbumsFunctionServiceRoleDefaultPolicy4CF5AB8F",
+    "AlbumsFunctionServiceRole7C89B48D"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/AlbumsFunction/Resource",
+    "aws:asset:path": "asset.cb494f15ee8a1aedbf5e366a3c1671e131aeb727f4928c6af198c10bc5ebc5a5",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "ProjectsFunctionServiceRoleDD9FA005": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/ProjectsFunction/ServiceRole/Resource"
+   }
+  },
+  "ProjectsFunctionServiceRoleDefaultPolicy2FA9AE3F": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "RolloutTable5C377832",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "RolloutTable5C377832",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-east-1:016442247702:table/",
+           {
+            "Ref": "RolloutTable5C377832"
+           }
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-east-1:016442247702:table/",
+           {
+            "Ref": "RolloutTable5C377832"
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ProjectsFunctionServiceRoleDefaultPolicy2FA9AE3F",
+    "Roles": [
+     {
+      "Ref": "ProjectsFunctionServiceRoleDD9FA005"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/ProjectsFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ProjectsFunction10797EC9": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-016442247702-us-west-2",
+     "S3Key": "949af76c99e9b515705c39534d40cbb7d063b5fc5fc975fe70e77cdb61015a11.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": {
+       "Ref": "RolloutTable5C377832"
+      },
+      "MEDIA_BUCKET": {
+       "Ref": "RolloutMediaBucket5902AF71"
+      },
+      "USER_POOL_ID": {
+       "Ref": "RolloutUserPool56876F61"
+      },
+      "REGION": "us-west-2"
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "ProjectsFunctionServiceRoleDD9FA005",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 15
+   },
+   "DependsOn": [
+    "ProjectsFunctionServiceRoleDefaultPolicy2FA9AE3F",
+    "ProjectsFunctionServiceRoleDD9FA005"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/ProjectsFunction/Resource",
+    "aws:asset:path": "asset.949af76c99e9b515705c39534d40cbb7d063b5fc5fc975fe70e77cdb61015a11",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "PresignFunctionServiceRole6C7E924A": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/PresignFunction/ServiceRole/Resource"
+   }
+  },
+  "PresignFunctionServiceRoleDefaultPolicy6338BD22": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "RolloutMediaBucket5902AF71",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "RolloutMediaBucket5902AF71",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "PresignFunctionServiceRoleDefaultPolicy6338BD22",
+    "Roles": [
+     {
+      "Ref": "PresignFunctionServiceRole6C7E924A"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/PresignFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "PresignFunction7C4B21EC": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-016442247702-us-west-2",
+     "S3Key": "784d3b94e6a91f12815eaf8355489cbb4ea443b48406501b0e382f86d1f66af5.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": {
+       "Ref": "RolloutTable5C377832"
+      },
+      "MEDIA_BUCKET": {
+       "Ref": "RolloutMediaBucket5902AF71"
+      },
+      "USER_POOL_ID": {
+       "Ref": "RolloutUserPool56876F61"
+      },
+      "REGION": "us-west-2"
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "PresignFunctionServiceRole6C7E924A",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "PresignFunctionServiceRoleDefaultPolicy6338BD22",
+    "PresignFunctionServiceRole6C7E924A"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/PresignFunction/Resource",
+    "aws:asset:path": "asset.784d3b94e6a91f12815eaf8355489cbb4ea443b48406501b0e382f86d1f66af5",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "RolloutHttpApi13C66EA2": {
+   "Type": "AWS::ApiGatewayV2::Api",
+   "Properties": {
+    "CorsConfiguration": {
+     "AllowHeaders": [
+      "*"
+     ],
+     "AllowMethods": [
+      "*"
+     ],
+     "AllowOrigins": [
+      "*"
+     ]
+    },
+    "Name": "rollout-api",
+    "ProtocolType": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/Resource"
+   }
+  },
+  "RolloutHttpApiDefaultStageCE5EE053": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AutoDeploy": true,
+    "StageName": "$default"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/DefaultStage/Resource"
+   }
+  },
+  "RolloutHttpApiGETmeMeIntegration59788203": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "MeFunction4482FBE1",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--me/MeIntegration/Resource"
+   }
+  },
+  "RolloutHttpApiGETmeMeIntegrationPermission1C91E081": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "MeFunction4482FBE1",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/me"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--me/MeIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiGETme412E4036": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "GET /me",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiGETmeMeIntegration59788203"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--me/Resource"
+   }
+  },
+  "RolloutHttpApiRolloutAuthorizer25CFC63A": {
+   "Type": "AWS::ApiGatewayV2::Authorizer",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizerType": "JWT",
+    "IdentitySource": [
+     "$request.header.Authorization"
+    ],
+    "JwtConfiguration": {
+     "Audience": [
+      {
+       "Ref": "RolloutUserPoolClientC2F2B0AC"
+      }
+     ],
+     "Issuer": {
+      "Fn::Join": [
+       "",
+       [
+        "https://cognito-idp.us-west-2.amazonaws.com/",
+        {
+         "Ref": "RolloutUserPool56876F61"
+        }
+       ]
+      ]
+     }
+    },
+    "Name": "RolloutAuthorizer"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/RolloutAuthorizer/Resource"
+   }
+  },
+  "RolloutHttpApiGETalbumsAlbumsIntegrationCB7606BB": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "AlbumsFunction044E746F",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--albums/AlbumsIntegration/Resource"
+   }
+  },
+  "RolloutHttpApiGETalbumsAlbumsIntegrationPermissionEFE23F36": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "AlbumsFunction044E746F",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/albums"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--albums/AlbumsIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiGETalbums63280A5D": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "GET /albums",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiGETalbumsAlbumsIntegrationCB7606BB"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--albums/Resource"
+   }
+  },
+  "RolloutHttpApiPOSTalbumsAlbumsIntegrationPermission5506E3AF": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "AlbumsFunction044E746F",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/albums"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/POST--albums/AlbumsIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiPOSTalbums94C79715": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "POST /albums",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiGETalbumsAlbumsIntegrationCB7606BB"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/POST--albums/Resource"
+   }
+  },
+  "RolloutHttpApiPUTalbumsAlbumsIntegrationPermission26E5D526": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "AlbumsFunction044E746F",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/albums"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/PUT--albums/AlbumsIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiPUTalbumsA9105A94": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "PUT /albums",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiGETalbumsAlbumsIntegrationCB7606BB"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/PUT--albums/Resource"
+   }
+  },
+  "RolloutHttpApiDELETEalbumsidAlbumsByIdIntegration9F53317A": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "AlbumsFunction044E746F",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/DELETE--albums--{id}/AlbumsByIdIntegration/Resource"
+   }
+  },
+  "RolloutHttpApiDELETEalbumsidAlbumsByIdIntegrationPermission3AB1D9F0": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "AlbumsFunction044E746F",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/albums/{id}"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/DELETE--albums--{id}/AlbumsByIdIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiDELETEalbumsid1AE775C2": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "DELETE /albums/{id}",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiDELETEalbumsidAlbumsByIdIntegration9F53317A"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/DELETE--albums--{id}/Resource"
+   }
+  },
+  "RolloutHttpApiGETprojectsProjectsIntegrationB0ACDC75": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ProjectsFunction10797EC9",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--projects/ProjectsIntegration/Resource"
+   }
+  },
+  "RolloutHttpApiGETprojectsProjectsIntegrationPermission13BD8099": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ProjectsFunction10797EC9",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/projects"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--projects/ProjectsIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiGETprojects7C89D9FE": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "GET /projects",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiGETprojectsProjectsIntegrationB0ACDC75"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--projects/Resource"
+   }
+  },
+  "RolloutHttpApiPOSTprojectsProjectsIntegrationPermissionE0FCCB6F": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ProjectsFunction10797EC9",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/projects"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/POST--projects/ProjectsIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiPOSTprojectsC05328A6": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "POST /projects",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiGETprojectsProjectsIntegrationB0ACDC75"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/POST--projects/Resource"
+   }
+  },
+  "RolloutHttpApiGETprojectsidProjectsByIdIntegration3264437F": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ProjectsFunction10797EC9",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--projects--{id}/ProjectsByIdIntegration/Resource"
+   }
+  },
+  "RolloutHttpApiGETprojectsidProjectsByIdIntegrationPermission9913D59C": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ProjectsFunction10797EC9",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/projects/{id}"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--projects--{id}/ProjectsByIdIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiGETprojectsid218AF519": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "GET /projects/{id}",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiGETprojectsidProjectsByIdIntegration3264437F"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/GET--projects--{id}/Resource"
+   }
+  },
+  "RolloutHttpApiPUTprojectsidProjectsByIdIntegrationPermission848179DF": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ProjectsFunction10797EC9",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/projects/{id}"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/PUT--projects--{id}/ProjectsByIdIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiPUTprojectsid1B3C0840": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "PUT /projects/{id}",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiGETprojectsidProjectsByIdIntegration3264437F"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/PUT--projects--{id}/Resource"
+   }
+  },
+  "RolloutHttpApiDELETEprojectsidProjectsByIdIntegrationPermission591EA144": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ProjectsFunction10797EC9",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/projects/{id}"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/DELETE--projects--{id}/ProjectsByIdIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiDELETEprojectsidD8D0EA48": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "DELETE /projects/{id}",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiGETprojectsidProjectsByIdIntegration3264437F"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/DELETE--projects--{id}/Resource"
+   }
+  },
+  "RolloutHttpApiPOSTuploadspresignPresignIntegration9FAE612D": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "PresignFunction7C4B21EC",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/POST--uploads--presign/PresignIntegration/Resource"
+   }
+  },
+  "RolloutHttpApiPOSTuploadspresignPresignIntegrationPermission2AA6F621": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "PresignFunction7C4B21EC",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:016442247702:",
+       {
+        "Ref": "RolloutHttpApi13C66EA2"
+       },
+       "/*/*/uploads/presign"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/POST--uploads--presign/PresignIntegration-Permission"
+   }
+  },
+  "RolloutHttpApiPOSTuploadspresignB49274DE": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RolloutHttpApi13C66EA2"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "RolloutHttpApiRolloutAuthorizer25CFC63A"
+    },
+    "RouteKey": "POST /uploads/presign",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RolloutHttpApiPOSTuploadspresignPresignIntegration9FAE612D"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/RolloutHttpApi/POST--uploads--presign/Resource"
+   }
+  },
+  "AliasRecordRoot03DE0247": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::GetAtt": [
+       "RolloutDistribution1DEBB76D",
+       "DomainName"
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::FindInMap": [
+       "AWSCloudFrontPartitionHostedZoneIdMap",
+       {
+        "Ref": "AWS::Partition"
+       },
+       "zoneId"
+      ]
+     }
+    },
+    "HostedZoneId": "Z05428681W4KQCG8CTAIL",
+    "Name": "rolloutwav.com.",
+    "Type": "A"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/AliasRecordRoot/Resource"
+   }
+  },
+  "AliasRecordWWWE6D10AB7": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::GetAtt": [
+       "RolloutDistribution1DEBB76D",
+       "DomainName"
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::FindInMap": [
+       "AWSCloudFrontPartitionHostedZoneIdMap",
+       {
+        "Ref": "AWS::Partition"
+       },
+       "zoneId"
+      ]
+     }
+    },
+    "HostedZoneId": "Z05428681W4KQCG8CTAIL",
+    "Name": "www.rolloutwav.com.",
+    "Type": "A"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/AliasRecordWWW/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11SX28aMQz/LH0PWQub9kwPTa3UaQi2viKTmJtLLjklDqdblO8+5Q446JN/f2zLTjyX86ev8vEBujBT+jgztJdpy6COArqwS2Eh03NUR2RRHewZjWHtDKl+ks98JM8QMAuFnulAChgbsFCjlysb3sGQBkZdTbYw0Ow1yPQjWsXkbOl7i9+gR/+OPhS+JVsbZHeXsUbfUCh+FgSNTBtnsBhDnKY9o5/DQHrS74QswmKXIATkIJclCI2tcX2DluW44+oqZKGMi/rgnWWZVhTY0z5eBrvlWShXW2In05+Afu2cKSlXfAEr1wDZW+usXGhlCC3fJkzKq0bLxH1Rs9C9hcbpvUy/YT++yACygJZqYOygP81lemFuly0Vv4RCtwz1UDCCIm1c5BG9Wsbaw2XLT3TKW0b+6zz9Qz+0vrIsfMn5tpBpuUHlvB7qBrRFzllUMbBrNhhc9Gr8yiu+s9benUijL1cnht8qA5OtxbVgvK+dKWe0gy4oQ3LZhcrQcFnnJdVxvIS2LcXVwf6K3EbOwjqN8iN8Oc3n8um7fHz4CEQzHy1Tg3Izxv+7cCmITQMAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "RolloutStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Mappings": {
+  "AWSCloudFrontPartitionHostedZoneIdMap": {
+   "aws": {
+    "zoneId": "Z2FDTNDATAQYW2"
+   },
+   "aws-cn": {
+    "zoneId": "Z3RFFRIM2A3IF5"
+   }
+  }
+ },
+ "Outputs": {
+  "DistributionURL": {
+   "Description": "CloudFront Distribution URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "RolloutDistribution1DEBB76D",
+        "DomainName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "CustomDomainURL": {
+   "Description": "Custom domain URL",
+   "Value": "https://rolloutwav.com"
+  },
+  "BucketName": {
+   "Description": "S3 Bucket Name",
+   "Value": {
+    "Ref": "RolloutWebsiteBucketA05E3C02"
+   }
+  },
+  "ApiUrl": {
+   "Description": "HTTP API endpoint",
+   "Value": {
+    "Fn::GetAtt": [
+     "RolloutHttpApi13C66EA2",
+     "ApiEndpoint"
+    ]
+   }
+  },
+  "UserPoolId": {
+   "Value": {
+    "Ref": "RolloutUserPool56876F61"
+   }
+  },
+  "UserPoolClientId": {
+   "Value": {
+    "Ref": "RolloutUserPoolClientC2F2B0AC"
+   }
+  },
+  "UserPoolDomain": {
+   "Value": "https://rollout-016442247702-us-west-2.auth.us-west-2.amazoncognito.com"
+  },
+  "MediaBucketName": {
+   "Value": {
+    "Ref": "RolloutMediaBucket5902AF71"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

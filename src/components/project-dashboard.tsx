@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Plus, SlidersHorizontal, Eye, List, Columns, GanttChartSquare, ArrowDownUp, GripVertical } from "lucide-react";
+import { Plus, SlidersHorizontal, Eye, List, Columns, GanttChartSquare } from "lucide-react";
 import { useProjectContext } from "@/context/project-context";
 
 
@@ -34,6 +34,7 @@ interface ProjectDashboardProps {
   projects: Project[];
   setProjects: (projects: Project[]) => void;
   albumName: string;
+  albumId: string;
 }
 
 type DisplayProperty = {
@@ -42,33 +43,40 @@ type DisplayProperty = {
 };
 
 
-export function ProjectDashboard({ projects, setProjects, albumName }: ProjectDashboardProps) {
+export function ProjectDashboard({ projects, setProjects, albumName, albumId }: ProjectDashboardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { addProjectToAlbum } = useProjectContext();
+  const { api } = require('@/lib/api');
   const [displayProperties, setDisplayProperties] = useState<DisplayProperty[]>([
-    { name: "Milestones", active: false },
-    { name: "Priority", active: true },
     { name: "Status", active: true },
-    { name: "Teams", active: false },
-    { name: "Lead", active: true },
-    { name: "Members", active: false },
-    { name: "Dependencies", active: false },
-    { name: "Start Date", active: false },
+    { name: "Priority", active: false },
+    { name: "Type", active: false },
+    { name: "Lead", active: false },
     { name: "Target Date", active: true },
-    { name: "Created", active: false },
-    { name: "Updated", active: false },
-    { name: "Completed", active: false },
-    { name: "Labels", active: false },
+    { name: "Share", active: true },
     { name: "Progress", active: true },
   ]);
+  const [colorMode, setColorMode] = useState<'none' | 'status' | 'priority' | 'type'>('none');
 
-  const handleAddProject = (project: Omit<Project, "id">) => {
-    const newProject: Project = { ...project, id: crypto.randomUUID() };
-    const newProjects = [...projects, newProject].sort(
-        (a, b) => a.targetDate.getTime() - b.targetDate.getTime()
-      );
-    setProjects(newProjects);
-    setIsDialogOpen(false);
+  const handleAddProject = async (project: Omit<Project, "id">) => {
+    const payload = {
+      albumId,
+      name: project.name,
+      status: project.status,
+      priority: project.priority,
+      targetDate: project.targetDate ? project.targetDate.toISOString() : undefined,
+      type: project.type,
+    };
+    try {
+      const created = await api.createProject(payload);
+      const fallbackDate = project.targetDate ?? (created?.targetDate ? new Date(created.targetDate) : new Date(Date.now() + 365*24*60*60*1000));
+      const newProject: Project = { ...project, id: created.projectId, targetDate: fallbackDate };
+      const newProjects = [...projects, newProject].sort((a, b) => (a.targetDate?.getTime?.() ?? 0) - (b.targetDate?.getTime?.() ?? 0));
+      setProjects(newProjects);
+      setIsDialogOpen(false);
+    } catch (e) {
+      // no-op UI stays open; backend error likely auth
+    }
   };
 
   const toggleProperty = (propertyName: string) => {
@@ -120,80 +128,32 @@ export function ProjectDashboard({ projects, setProjects, albumName }: ProjectDa
                     </div>
                   </div>
                   <DropdownMenuSeparator />
-                  <div className="p-2 space-y-2">
-                     <div className="flex items-center justify-between">
-                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <GripVertical className="h-4 w-4" />
-                        <span>Grouping</span>
-                       </div>
-                       <Select defaultValue="lead">
-                          <SelectTrigger className="w-[150px] h-7 text-xs">
-                            <SelectValue placeholder="Select grouping" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="lead">Lead</SelectItem>
-                            <SelectItem value="status">Status</SelectItem>
-                            <SelectItem value="priority">Priority</SelectItem>
-                          </SelectContent>
-                        </Select>
-                     </div>
-                     <div className="flex items-center justify-between">
-                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <GripVertical className="h-4 w-4" />
-                        <span>Sub-grouping</span>
-                       </div>
-                       <Select defaultValue="none">
-                          <SelectTrigger className="w-[150px] h-7 text-xs">
-                            <SelectValue placeholder="Select sub-grouping" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">No grouping</SelectItem>
-                            <SelectItem value="status">Status</SelectItem>
-                            <SelectItem value="priority">Priority</SelectItem>
-                          </SelectContent>
-                        </Select>
-                     </div>
-                     <div className="flex items-center justify-between">
-                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <ArrowDownUp className="h-4 w-4" />
-                        <span>Ordering</span>
-                       </div>
-                       <Select defaultValue="manual">
-                          <SelectTrigger className="w-[150px] h-7 text-xs">
-                            <SelectValue placeholder="Select ordering" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="manual">Manual</SelectItem>
-                            <SelectItem value="priority">Priority</SelectItem>
-                            <SelectItem value="target-date">Target Date</SelectItem>
-                          </SelectContent>
-                        </Select>
-                     </div>
-                  </div>
-                   <DropdownMenuSeparator />
-                    <div className="p-2 space-y-3">
-                      <Label className="text-xs font-normal text-muted-foreground">List options</Label>
-                       <div className="flex items-center justify-between">
-                          <Label htmlFor="show-empty-groups" className="text-sm font-normal">Show empty groups</Label>
-                          <Switch id="show-empty-groups" />
-                       </div>
-                        <div>
-                          <Label className="text-sm font-normal">Display properties</Label>
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {displayProperties.map(prop => (
-                              <Button key={prop.name} variant={prop.active ? 'secondary' : 'ghost'} size="sm" className="h-7 text-xs" onClick={() => toggleProperty(prop.name)}>
-                                {prop.name}
-                              </Button>
-                            ))}
-                          </div>
-                          <Button variant="link" size="sm" className="h-auto p-0 mt-2 text-xs text-muted-foreground">Add label group...</Button>
-                        </div>
+                  <div className="p-2 space-y-3">
+                    <div>
+                      <Label className="text-sm font-normal">Display properties</Label>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {displayProperties.map(prop => (
+                          <Button key={prop.name} variant={prop.active ? 'secondary' : 'ghost'} size="sm" className="h-7 text-xs" onClick={() => toggleProperty(prop.name)}>
+                            {prop.name}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                  <DropdownMenuSeparator />
-                   <div className="p-2 flex justify-between items-center">
-                     <Button variant="ghost" size="sm" className="h-7 text-xs">Reset</Button>
-                     <Button variant="ghost" size="sm" className="h-7 text-xs">Set default for everyone</Button>
-                   </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-normal">Row highlighting</Label>
+                      <Select value={colorMode} onValueChange={(v: 'none' | 'status' | 'priority' | 'type') => setColorMode(v)}>
+                        <SelectTrigger className="w-full h-7 text-xs">
+                          <SelectValue placeholder="Highlight rows by" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          <SelectItem value="status">Status</SelectItem>
+                          <SelectItem value="priority">Priority</SelectItem>
+                          <SelectItem value="type">Type</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -207,7 +167,7 @@ export function ProjectDashboard({ projects, setProjects, albumName }: ProjectDa
           </div>
           <div className="flex-grow rounded-lg border">
             {projects.length > 0 ? (
-              <ProjectList projects={projects} setProjects={setProjects} displayProperties={displayProperties} />
+              <ProjectList projects={projects} setProjects={setProjects} displayProperties={displayProperties} colorMode={colorMode} />
             ) : (
               <div className="flex items-center justify-center h-full text-center p-8">
                  <p className="text-muted-foreground">This album has no projects yet. <br/> Click "Add project" to get started.</p>

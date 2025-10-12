@@ -27,35 +27,22 @@ export function ProjectTimeline({ events }: ProjectTimelineProps) {
     );
   }
 
-  const getIconOrTime = (event: TimelineEvent) => {
-    switch (event.type) {
-      case "Update":
-        return <MessageSquare className="h-4 w-4 text-primary" />;
-      case "Upload":
-        if(event.contentType === 'Song') {
-            return <Music className="h-4 w-4 text-green-400" />
-        }
-        return <span className="text-xs font-semibold text-muted-foreground">{format(event.timestamp, "p")}</span>;
-      default:
-        return null;
-    }
-  };
+  const formatTime = (event: TimelineEvent) => (
+    <span className="text-xs font-semibold text-muted-foreground">{format(event.timestamp, "p")}</span>
+  );
 
   return (
-    <div className="relative pl-8 py-6">
-      <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-border"></div>
-      <ul className="space-y-12">
+    <div className="relative py-4">
+      <ul className="space-y-8">
         {events.map((event, index) => (
           <li key={event.id} className="relative">
-            <div className="absolute left-1/2 -translate-x-1/2 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-background border-2 border-primary">
-              {getIconOrTime(event)}
-            </div>
-            <div className={cn("flex items-start w-full", index % 2 === 0 ? "justify-start" : "justify-end")}>
-               <div className={cn("w-[calc(50%-2rem)] space-y-1", index % 2 === 0 ? "text-left" : "text-right")}>
-                 <p className="text-sm text-muted-foreground">{format(event.timestamp, "MMM d, yyyy")}</p>
-                 <h4 className="font-semibold text-foreground">{event.title}</h4>
-                 <p className="text-sm text-muted-foreground break-words">{event.description}</p>
-               </div>
+            <div className="flex items-start w-full">
+              <div className="w-24 shrink-0 pt-1">{formatTime(event)}</div>
+              <div className="flex-1 space-y-1">
+                <p className="text-sm text-muted-foreground">{format(event.timestamp, "MMM d, yyyy")}</p>
+                <h4 className="font-semibold text-foreground">{event.title}</h4>
+                <p className="text-sm text-muted-foreground break-words">{event.description}</p>
+              </div>
             </div>
           </li>
         ))}

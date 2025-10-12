@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "0806340be62d123b83f1bd4a6e3a67079a3c807c3d37dd0cb07376e3a6204b16": {
+      "displayName": "RolloutReplicationStack Template",
+      "source": {
+        "path": "RolloutReplicationStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "016442247702-us-east-1-c1476d12": {
+          "bucketName": "cdk-hnb659fds-assets-016442247702-us-east-1",
+          "objectKey": "0806340be62d123b83f1bd4a6e3a67079a3c807c3d37dd0cb07376e3a6204b16.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::016442247702:role/cdk-hnb659fds-file-publishing-role-016442247702-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

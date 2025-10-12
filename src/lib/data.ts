@@ -4,7 +4,7 @@ import type { Project } from "@/lib/types";
 export const initialProjects: Project[] = [
     {
       id: "1",
-      name: "Ideas",
+      name: "Track 1",
       emoji: "💡",
       status: "On Track",
       targetDate: new Date("2024-08-10"),
@@ -29,7 +29,7 @@ export const initialProjects: Project[] = [
     },
     {
       id: "2",
-      name: "MUSLIS",
+      name: "Track 2",
       emoji: "🎵",
       status: "On Track",
       targetDate: new Date("2024-08-12"),
@@ -54,7 +54,7 @@ export const initialProjects: Project[] = [
     },
     {
       id: "3",
-      name: "Tanamoshi",
+      name: "Music video",
       emoji: "🧪",
       status: "On Track",
       targetDate: new Date("2024-08-15"),

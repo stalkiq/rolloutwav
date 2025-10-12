@@ -1,12 +1,7 @@
-
 "use client";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { createContext, useContext, useState, useRef, useEffect, useCallback, ReactNode } from 'react';
-
-interface Track {
-  name: string;
-  url: string;
-}
+export type Track = { name: string; url: string };
 
 interface AudioPlayerContextType {
   currentTrack: Track | null;
@@ -63,24 +58,26 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
 
   const setCurrentTrack = (track: Track) => {
     if (audioRef.current) {
-        if (currentTrack?.url === track.url) {
-            playPause();
-        } else {
-            setCurrentTrackState(track);
-            audioRef.current.src = track.url;
-            audioRef.current.play();
-            setIsPlaying(true);
-        }
+      if (currentTrack?.url === track.url) {
+        playPause();
+      } else {
+        setCurrentTrackState(track);
+        audioRef.current.src = track.url;
+        audioRef.current.play().catch(() => {});
+        setIsPlaying(true);
+      }
     }
   };
 
   const playPause = useCallback(() => {
     if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
+      try {
+        if (isPlaying) {
+          audioRef.current.pause();
+        } else {
+          audioRef.current.play().catch(() => {});
+        }
+      } catch {}
       setIsPlaying(!isPlaying);
     }
   }, [isPlaying]);
@@ -98,30 +95,32 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
       setIsMuted(!isMuted);
     }
   }, [isMuted]);
-  
+
   const closePlayer = () => {
     if (audioRef.current) {
-        audioRef.current.pause();
-        setIsPlaying(false);
+      audioRef.current.pause();
+      setIsPlaying(false);
     }
     setCurrentTrackState(null);
-  }
+  };
 
   return (
-    <AudioPlayerContext.Provider value={{
-      currentTrack,
-      isPlaying,
-      progress,
-      duration,
-      isMuted,
-      setCurrentTrack,
-      playPause,
-      seek,
-      toggleMute,
-      closePlayer,
-      formattedProgress,
-      formattedDuration,
-    }}>
+    <AudioPlayerContext.Provider
+      value={{
+        currentTrack,
+        isPlaying,
+        progress,
+        duration,
+        isMuted,
+        setCurrentTrack,
+        playPause,
+        seek,
+        toggleMute,
+        closePlayer,
+        formattedProgress,
+        formattedDuration,
+      }}
+    >
       {children}
     </AudioPlayerContext.Provider>
   );

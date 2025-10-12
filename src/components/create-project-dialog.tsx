@@ -46,9 +46,9 @@ import {
 import { cn } from "@/lib/utils";
 import type { Project, ProjectStatus, ProjectType, ProjectPriority } from "@/lib/types";
 
-const projectStatuses: ProjectStatus[] = ["On Track", "At Risk", "Off Track", "No updates"];
-const projectTypes: ProjectType[] = ["Song", "Video", "Feature", "Idea", "Other"];
-const projectPriorities: ProjectPriority[] = ["No priority", "Low", "Medium", "High", "Urgent"];
+const projectStatuses = ["On Track", "At Risk", "Off Track", "No updates"] as const;
+const projectTypes = ["Song", "Video", "Feature", "Idea", "Other"] as const;
+const projectPriorities = ["No priority", "Low", "Medium", "High", "Urgent"] as const;
 const emojis = ["🎵", "🎸", "🎹", "🎤", "🎧", "💡", "📹", "🔥", "✨", "🚀", "🎉", "🧪", ...Array.from({ length: 20 }, (_, i) => (i + 1).toString())];
 
 const projectSchema = z.object({
@@ -56,7 +56,8 @@ const projectSchema = z.object({
   emoji: z.string().optional(),
   type: z.enum(projectTypes),
   status: z.enum(projectStatuses),
-  targetDate: z.date({ required_error: "A target date is required." }),
+  // Target date optional so mobile users can create without picking a date
+  targetDate: z.date().optional(),
   priority: z.enum(projectPriorities).default('No priority'),
   lead: z.string().default('You'),
   progress: z.number().default(0),
@@ -91,7 +92,7 @@ export function CreateProjectDialog({
   });
 
   function onSubmit(data: ProjectFormValues) {
-    onProjectCreate(data);
+    onProjectCreate(data as unknown as Omit<Project, "id">);
     form.reset();
   }
 
