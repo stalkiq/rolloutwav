@@ -89,6 +89,7 @@ import {
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { ProjectTimeline, type TimelineEvent } from "@/components/project-timeline";
 import MixerPanel from "@/components/mixer-panel";
+import { LyricsEditor } from "@/components/lyrics-editor";
 import { api, API_URL } from '@/lib/api';
 
 
@@ -104,6 +105,7 @@ function ProjectDetailContentInner() {
 
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("Add a short summary...");
+  const [lyrics, setLyrics] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
 
@@ -175,6 +177,7 @@ function ProjectDetailContentInner() {
         status: updatedProject.status,
         priority: updatedProject.priority,
         description: updatedProject.description ?? '',
+        lyrics: updatedProject.lyrics ?? '',
         updates: updatedProject.updates ?? [],
         artists: updatedProject.artists ?? [],
         producers: updatedProject.producers ?? [],
@@ -217,6 +220,7 @@ function ProjectDetailContentInner() {
           lead: fromApi.lead || project?.lead || 'You',
           progress: project?.progress || 0,
           description: fromApi.description ?? project?.description ?? '',
+          lyrics: fromApi.lyrics ?? project?.lyrics ?? '',
           updates: parseUpdates(fromApi.updates) || project?.updates || [],
           artists: fromApi.artists || project?.artists || [],
           producers: fromApi.producers || project?.producers || [],
@@ -232,6 +236,7 @@ function ProjectDetailContentInner() {
         const currentDescription = merged.description || "Add description...";
         setDescription(currentDescription);
         setTempDescription(currentDescription);
+        setLyrics(merged.lyrics || "");
         setTargetDate(merged.targetDate);
         setArtists(merged.artists || []);
         setProducers(merged.producers || []);
@@ -272,6 +277,7 @@ function ProjectDetailContentInner() {
             lead: fromApi.lead || foundProject?.lead || 'You',
             progress: foundProject?.progress || 0,
             description: fromApi.description ?? foundProject?.description ?? '',
+            lyrics: fromApi.lyrics ?? foundProject?.lyrics ?? '',
             updates: parseUpdates(fromApi.updates) || foundProject?.updates || [],
             artists: fromApi.artists || foundProject?.artists || [],
             producers: fromApi.producers || foundProject?.producers || [],
@@ -292,6 +298,7 @@ function ProjectDetailContentInner() {
         const currentDescription = foundProject.description || "Add description...";
         setDescription(currentDescription);
         setTempDescription(currentDescription);
+        setLyrics(foundProject.lyrics || "");
         setTargetDate(foundProject.targetDate);
         setArtists(foundProject.artists || []);
         setProducers(foundProject.producers || []);
@@ -1537,6 +1544,16 @@ function ProjectDetailContentInner() {
                   ...(finalSong ? [finalSong] : []),
                 ]}
               />
+            </div>
+
+            <div className="mt-4">
+                <LyricsEditor 
+                    initialLyrics={lyrics} 
+                    onSave={(newLyrics) => {
+                        setLyrics(newLyrics);
+                        updateProjectInContext({ lyrics: newLyrics });
+                    }} 
+                />
             </div>
 
             <div className="space-y-2">

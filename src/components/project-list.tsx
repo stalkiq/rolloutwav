@@ -1,4 +1,4 @@
-"use client";
+"users";
 
 import * as React from "react";
 

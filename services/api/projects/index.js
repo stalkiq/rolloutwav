@@ -42,6 +42,7 @@ exports.handler = async (event) => {
       priority: body.priority || 'No priority',
       targetDate: body.targetDate || null,
       verses: [], hooks: [], beats: [], samples: [], finalSong: null,
+      lyrics: '',
       createdAt: now,
     };
     await ddb.send(new PutCommand({ TableName: TABLE_NAME, Item: item }));
@@ -50,13 +51,13 @@ exports.handler = async (event) => {
 
   if (method === 'PUT' && idParam) {
     const update = body || {};
-    const expr = 'SET #name = if_not_exists(#name, :empty), #status = :status, #priority = :priority, #verses = :verses, #hooks = :hooks, #beats = :beats, #samples = :samples, #finalSong = :finalSong, #description = :description, #updates = :updates, #artists = :artists, #producers = :producers, #writers = :writers, #lead = :lead, #startDate = :startDate, #targetDate = :targetDate';
+    const expr = 'SET #name = if_not_exists(#name, :empty), #status = :status, #priority = :priority, #verses = :verses, #hooks = :hooks, #beats = :beats, #samples = :samples, #finalSong = :finalSong, #description = :description, #updates = :updates, #artists = :artists, #producers = :producers, #writers = :writers, #lead = :lead, #startDate = :startDate, #targetDate = :targetDate, #lyrics = :lyrics';
     try {
       const res = await ddb.send(new UpdateCommand({
         TableName: TABLE_NAME,
         Key: { pk: `ALBUM#${albumId}`, sk: `PROJECT#${idParam}` },
         UpdateExpression: expr,
-        ExpressionAttributeNames: { '#name': 'name', '#status': 'status', '#priority': 'priority', '#verses': 'verses', '#hooks': 'hooks', '#beats': 'beats', '#samples': 'samples', '#finalSong': 'finalSong', '#description': 'description', '#updates': 'updates', '#artists': 'artists', '#producers': 'producers', '#writers': 'writers', '#lead': 'lead', '#startDate': 'startDate', '#targetDate': 'targetDate' },
+        ExpressionAttributeNames: { '#name': 'name', '#status': 'status', '#priority': 'priority', '#verses': 'verses', '#hooks': 'hooks', '#beats': 'beats', '#samples': 'samples', '#finalSong': 'finalSong', '#description': 'description', '#updates': 'updates', '#artists': 'artists', '#producers': 'producers', '#writers': 'writers', '#lead': 'lead', '#startDate': 'startDate', '#targetDate': 'targetDate', '#lyrics': 'lyrics' },
         ExpressionAttributeValues: {
           ':empty': update.name || 'Untitled project',
           ':status': update.status || 'On Track',
@@ -74,6 +75,7 @@ exports.handler = async (event) => {
           ':lead': update.lead || 'You',
           ':startDate': update.startDate || null,
           ':targetDate': update.targetDate || null,
+          ':lyrics': update.lyrics || '',
         },
         ConditionExpression: 'attribute_exists(pk) AND attribute_exists(sk)',
         ReturnValues: 'ALL_NEW',

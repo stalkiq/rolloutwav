@@ -29,6 +29,7 @@ export type Project = {
   lead: string;
   progress: number;
   description?: string;
+  lyrics?: string;
   updates?: Update[];
   artists?: Artist[];
   producers?: Artist[];
